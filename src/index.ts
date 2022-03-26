@@ -2,8 +2,11 @@ import fs from 'fs'
 import {join} from 'path'
 import fetch from 'node-fetch'
 import yaml from 'js-yaml'
+import type {JSONSchemaType} from 'ajv'
+import Ajv from 'ajv'
 
 import type ReposFile from './__types__/ReposFile'
+import {ReposFileSchema} from './__schemas__/ReposFile'
 
 const cacheDirectory = join(process.cwd(), '.cache')
 const reposFilePath = join(cacheDirectory, 'repos.yaml')
@@ -23,7 +26,18 @@ async function doIfDoesNotExist(filePath: string, func: () => Promise<void>) {
 
 function loadReposFile(reposFilePath: string): ReposFile {
   const text = fs.readFileSync(reposFilePath, 'utf8')
-  return yaml.load(text) as ReposFile
+  const reposYaml = yaml.load(text) as ReposFile
+  validateSchema<ReposFile>(reposYaml, ReposFileSchema)
+  return reposYaml
+}
+
+function validateSchema<T>(object: unknown, schema: JSONSchemaType<T>) {
+  const ajv = new Ajv()
+  const valid = ajv.validate(schema, object)
+  if (!valid) {
+    console.error(ajv.errorsText())
+    process.exit(1)
+  }
 }
 
 async function main() {
