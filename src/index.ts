@@ -2,8 +2,7 @@ import fs from 'fs'
 import {join} from 'path'
 import fetch from 'node-fetch'
 import yaml from 'js-yaml'
-import type {JSONSchemaType} from 'ajv'
-import Ajv from 'ajv'
+import validateSchema from './utils/validate-schema'
 
 import type ReposFile from './__types__/ReposFile'
 import {ReposFileSchema} from './__schemas__/ReposFile'
@@ -29,15 +28,6 @@ function loadReposFile(reposFilePath: string): ReposFile {
   const reposYaml = yaml.load(text) as ReposFile
   validateSchema<ReposFile>(reposYaml, ReposFileSchema)
   return reposYaml
-}
-
-function validateSchema<T>(object: unknown, schema: JSONSchemaType<T>) {
-  const ajv = new Ajv()
-  const valid = ajv.validate(schema, object)
-  if (!valid) {
-    console.error(ajv.errorsText())
-    process.exit(1)
-  }
 }
 
 async function main() {
