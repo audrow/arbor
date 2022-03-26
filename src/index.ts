@@ -3,6 +3,7 @@ import gitClone from 'git-clone/promise'
 import yaml from 'js-yaml'
 import fetch from 'node-fetch'
 import {join} from 'path'
+import log from './logger'
 import validateSchema from './utils/validate-schema'
 import {ReposFileSchema} from './__schemas__/ReposFile'
 import type RepoInfo from './__types__/RepoInfo'
@@ -31,17 +32,17 @@ async function setupCache() {
     cacheDirectory,
     async () => {
       fs.mkdirSync(cacheDirectory)
-      console.debug(`Created cache directory: ${cacheDirectory}`)
+      log.debug(`Created cache directory: ${cacheDirectory}`)
     },
-    async () => console.debug(`Cache directory already exists`),
+    async () => log.debug(`Cache directory already exists`),
   )
   await doIfPathDoesNotExist(
     reposFilePath,
     async () => {
       await getReposFile(reposUrl, reposFilePath),
-        console.debug(`Downloaded repos file: ${reposFilePath}`)
+        log.debug(`Downloaded repos file: ${reposFilePath}`)
     },
-    async () => console.debug(`Repos file already exists`),
+    async () => log.debug(`Repos file already exists`),
   )
 }
 
@@ -53,13 +54,13 @@ async function cloneRepo(ownerAndRepo: string, info: RepoInfo) {
     async () => {
       if (info.type === 'git') {
         await gitClone(info.url, repoPath, {checkout: info.version})
-        console.info(`Cloned ${ownerAndRepo}`)
+        log.info(`Cloned ${ownerAndRepo}`)
       } else {
-        console.error(`Unsupported repository type: '${info.type}'`)
+        log.error(`Unsupported repository type: '${info.type}'`)
         process.exit(1)
       }
     },
-    async () => console.debug(`${ownerAndRepo} already exists`),
+    async () => log.debug(`${ownerAndRepo} already exists`),
   )
 }
 
