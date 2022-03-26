@@ -1,11 +1,10 @@
 import fs from 'fs'
-import {join} from 'path'
-import fetch from 'node-fetch'
 import yaml from 'js-yaml'
+import fetch from 'node-fetch'
+import {join} from 'path'
 import validateSchema from './utils/validate-schema'
-
-import type ReposFile from './__types__/ReposFile'
 import {ReposFileSchema} from './__schemas__/ReposFile'
+import type ReposFile from './__types__/ReposFile'
 
 const cacheDirectory = join(process.cwd(), '.cache')
 const reposFilePath = join(cacheDirectory, 'repos.yaml')
