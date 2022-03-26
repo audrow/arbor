@@ -7,12 +7,11 @@ export const ReposFileSchema: JSONSchemaType<ReposFile> = {
     repositories: {
       type: 'object',
       patternProperties: {
-        '^.*$': {
+        '^.*/.*$': {
           type: 'object',
           properties: {
             type: {
               type: 'string',
-              enum: ['git'],
             },
             url: {
               type: 'string',
@@ -25,6 +24,7 @@ export const ReposFileSchema: JSONSchemaType<ReposFile> = {
           additionalProperties: false,
         },
       },
+      additionalProperties: false,
       required: [],
       minProperties: 1,
     },

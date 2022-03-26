@@ -1,10 +1,8 @@
+import RepoInfo from './RepoInfo'
+
 type ReposFile = {
   repositories: {
-    [ownerAndRepo: string]: {
-      type: 'git'
-      url: string
-      version: string
-    }
+    [ownerAndRepo: string]: RepoInfo
   }
 }
 
