@@ -1,7 +1,7 @@
 import glob from 'glob'
-import {cloneRepo, loadReposFile, setupCache} from './cache/cache'
 import constants from './constants'
-import PackageXml from './dom/dom'
+import {cloneRepo, loadReposFile, setupCache} from './core/cache'
+import PackageXml from './core/package-xml'
 
 async function main() {
   await setupCache()

@@ -4,11 +4,11 @@ import yaml from 'js-yaml'
 import fetch from 'node-fetch'
 import {join} from 'path'
 import constants from '../constants'
-import log from '../logger'
 import validateSchema from '../utils/validate-schema'
-import {ReposFileSchema} from '../__schemas__/ReposFile'
-import type RepoInfo from '../__types__/RepoInfo'
-import type ReposFile from '../__types__/ReposFile'
+import log from './logger'
+import {ReposFileSchema} from './__schemas__/ReposFile'
+import type RepoInfo from './__types__/RepoInfo'
+import type ReposFile from './__types__/ReposFile'
 
 export async function getReposFile(reposUrl: string, reposFilePath: string) {
   const data = await fetch(reposUrl)

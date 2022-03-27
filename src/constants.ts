@@ -1,6 +1,6 @@
 import {join} from 'path'
 
-export const cacheDirectory = join(process.cwd(), '.cache')
+export const cacheDirectory = join(process.cwd(), '.arbor')
 export const cachedReposFilePath = join(cacheDirectory, 'repos.yaml')
 export const cachedReposDirectory = join(cacheDirectory, 'repos')
 export const reposUrl =
@@ -12,4 +12,5 @@ export default {
   cachedReposFilePath,
   cachedReposDirectory,
   reposUrl,
+  debugLevel,
 }
