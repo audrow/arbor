@@ -1,6 +1,6 @@
 import render from 'dom-serializer'
 import type {Document} from 'domhandler'
-import {cloneNode, Text} from 'domhandler'
+import {cloneNode, Element, Text} from 'domhandler'
 import fs from 'fs'
 import gitClone from 'git-clone/promise'
 import glob from 'glob'
@@ -10,8 +10,10 @@ import fetch from 'node-fetch'
 import {join} from 'path'
 import format from 'xml-formatter'
 import log from './logger'
+import {difference, union} from './utils/sets'
 import validateSchema from './utils/validate-schema'
 import {ReposFileSchema} from './__schemas__/ReposFile'
+import type People from './__types__/People'
 import type RepoInfo from './__types__/RepoInfo'
 import type ReposFile from './__types__/ReposFile'
 
@@ -19,6 +21,9 @@ const cacheDirectory = join(process.cwd(), '.cache')
 const cachedReposFilePath = join(cacheDirectory, 'repos.yaml')
 const cachedReposDirectory = join(cacheDirectory, 'repos')
 const reposUrl = 'https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos'
+
+const MAINTAINER_TAG = 'maintainer'
+const AUTHOR_TAG = 'author'
 
 async function getReposFile(reposUrl: string, reposFilePath: string) {
   const data = await fetch(reposUrl)
@@ -82,21 +87,33 @@ async function doIfPathDoesNotExist(
   }
 }
 
-function getMaintainers(packageXml: Document) {
-  const maintainers = DomUtils.getElementsByTagName('maintainer', packageXml)
-  return maintainers.map((m) => {
+function getMaintainers(packageXml: Document): People[] {
+  return getPeople(packageXml, 'maintainer')
+}
+
+function getAuthors(packageXml: Document): People[] {
+  return getPeople(packageXml, 'author')
+}
+
+function getPeople(packageXml: Document, tag: string): People[] {
+  const people = getDomElementByTag(packageXml, tag)
+  return people.map((m) => {
     const name = (m.children[0] as Text).data
     const email = m.attribs.email
     return {name, email}
   })
 }
 
-function getVersion(packageXml: Document) {
+function getDomElementByTag(dom: Document, tag: string) {
+  return DomUtils.getElementsByTagName(tag, dom)
+}
+
+export function getVersion(packageXml: Document) {
   const version = DomUtils.getElementsByTagName('version', packageXml)[0]
   return (version.children[0] as Text).data
 }
 
-function setVersion(packageXml: Document, version: string) {
+export function setVersion(packageXml: Document, version: string) {
   const dom = cloneNode(packageXml, true)
   const versionTag = DomUtils.getElementsByTagName('version', dom)
   if (versionTag.length !== 1) {
@@ -108,37 +125,53 @@ function setVersion(packageXml: Document, version: string) {
   return dom
 }
 
-export function modifyMaintainers(packageXmlPath: string) {
-  const packageXml = fs.readFileSync(packageXmlPath, 'utf8')
-  console.log(packageXmlPath)
-  console.log(packageXml)
+export function setMaintainers(packageXml: Document, newMaintainers: People[]) {
+  const currentMaintainers = getMaintainers(packageXml)
+  const currentAuthors = getAuthors(packageXml)
+  const authorsToAdd = difference(
+    new Set(currentMaintainers),
+    new Set(newMaintainers),
+  )
+  const newAuthors = [...union(new Set(currentAuthors), new Set(authorsToAdd))]
 
-  const dom = parseDocument(packageXml)
-  console.log(dom)
+  let outPackageXml = replacePeopleInDom(
+    packageXml,
+    MAINTAINER_TAG,
+    newMaintainers,
+  )
+  outPackageXml = replacePeopleInDom(outPackageXml, AUTHOR_TAG, newAuthors)
 
-  const maintainers = DomUtils.getElementsByTagName('maintainer', dom)
-  const newMaintainerData = {
-    name: 'Audrow Nash',
-    email: 'audrow@hey.com',
+  return outPackageXml
+}
+
+function replacePeopleInDom(dom: Document, tag: string, people: People[]) {
+  function setEmailAndName(element: Element, person: People) {
+    if (person.email) {
+      element.attribs.email = person.email
+    } else {
+      delete element.attribs.email
+    }
+    ;(element.children[0] as Text).data = person.name
   }
-  const newMaintainer = cloneNode(maintainers[0], true)
-  newMaintainer.attribs.email = newMaintainerData.email
-  ;(newMaintainer.children[0] as Text).data = newMaintainerData.name
 
-  const newAuthor = cloneNode(maintainers[0], true)
-  newAuthor.tagName = 'author'
-  const authors = DomUtils.getElementsByTagName('author', dom)
-  DomUtils.append(authors[0], newAuthor)
+  people.sort((a, b) => a.name.localeCompare(b.name))
 
-  DomUtils.append(maintainers[1], newMaintainer)
-  DomUtils.removeElement(maintainers[1])
-  let out = render(dom, {selfClosingTags: true})
-  out = format(out, {
-    indentation: '  ',
-    collapseContent: true,
-    whiteSpaceAtEndOfSelfclosingTag: true,
+  const clonedDom = cloneNode(dom, true)
+  const taggedElements = getDomElementByTag(clonedDom, tag)
+  if (taggedElements.length < 1) {
+    throw new Error('No maintainers found')
+  }
+  taggedElements.slice(1).forEach((m) => {
+    DomUtils.removeElement(m)
   })
-  console.log(out)
+  setEmailAndName(taggedElements[0], people[0])
+
+  people.slice(1).forEach((m) => {
+    const newMaintainer = cloneNode(taggedElements[0], true)
+    setEmailAndName(newMaintainer, m)
+    DomUtils.append(taggedElements[0], newMaintainer)
+  })
+  return clonedDom
 }
 
 async function main() {
@@ -156,8 +189,25 @@ async function main() {
   })
   const packageXml = fs.readFileSync(packageXmlPaths[0], 'utf8')
   const dom = parseDocument(packageXml)
-  const dom2 = setVersion(dom, '1.0.1')
-  console.log(getMaintainers(dom), getVersion(dom), getVersion(dom2))
+  const dom3 = setMaintainers(dom, [
+    {
+      name: 'Audrow Nash',
+      email: 'audrow@hey.com',
+    },
+    {
+      name: 'Bob Dylan',
+    },
+    {
+      name: 'Dirk Thomas',
+    },
+  ])
+  console.log(
+    format(render(dom3, {selfClosingTags: true}), {
+      indentation: '  ',
+      collapseContent: true,
+      whiteSpaceAtEndOfSelfclosingTag: true,
+    }),
+  )
 }
 
 main()
