@@ -1,4 +1,5 @@
 import render from 'dom-serializer'
+import type {Document} from 'domhandler'
 import {cloneNode, Text} from 'domhandler'
 import fs from 'fs'
 import gitClone from 'git-clone/promise'
@@ -81,21 +82,35 @@ async function doIfPathDoesNotExist(
   }
 }
 
-async function main() {
-  await setupCache()
-
-  const reposFile = loadReposFile(cachedReposFilePath)
-  Object.entries(reposFile.repositories)
-    .slice(0, 2)
-    .map(async ([key, info]) => await cloneRepo(key, info))
-
-  // TODO find paths to package xmls
-  const packageXmlPaths = glob.sync('**/package.xml', {
-    cwd: cachedReposDirectory,
-    realpath: true,
+function getMaintainers(packageXml: Document) {
+  const maintainers = DomUtils.getElementsByTagName('maintainer', packageXml)
+  return maintainers.map((m) => {
+    const name = (m.children[0] as Text).data
+    const email = m.attribs.email
+    return {name, email}
   })
-  const packageXml = fs.readFileSync(packageXmlPaths[0], 'utf8')
-  console.log(packageXmlPaths[0])
+}
+
+function getVersion(packageXml: Document) {
+  const version = DomUtils.getElementsByTagName('version', packageXml)[0]
+  return (version.children[0] as Text).data
+}
+
+function setVersion(packageXml: Document, version: string) {
+  const dom = cloneNode(packageXml, true)
+  const versionTag = DomUtils.getElementsByTagName('version', dom)
+  if (versionTag.length !== 1) {
+    throw new Error('Version tag not found')
+  } else if (versionTag[0].children.length !== 1) {
+    throw new Error('Invalid version text entry')
+  }
+  ;(versionTag[0].children[0] as Text).data = version
+  return dom
+}
+
+export function modifyMaintainers(packageXmlPath: string) {
+  const packageXml = fs.readFileSync(packageXmlPath, 'utf8')
+  console.log(packageXmlPath)
   console.log(packageXml)
 
   const dom = parseDocument(packageXml)
@@ -124,6 +139,25 @@ async function main() {
     whiteSpaceAtEndOfSelfclosingTag: true,
   })
   console.log(out)
+}
+
+async function main() {
+  await setupCache()
+
+  const reposFile = loadReposFile(cachedReposFilePath)
+  Object.entries(reposFile.repositories)
+    .slice(0, 2)
+    .map(async ([key, info]) => await cloneRepo(key, info))
+
+  // TODO find paths to package xmls
+  const packageXmlPaths = glob.sync('**/package.xml', {
+    cwd: cachedReposDirectory,
+    realpath: true,
+  })
+  const packageXml = fs.readFileSync(packageXmlPaths[0], 'utf8')
+  const dom = parseDocument(packageXml)
+  const dom2 = setVersion(dom, '1.0.1')
+  console.log(getMaintainers(dom), getVersion(dom), getVersion(dom2))
 }
 
 main()
