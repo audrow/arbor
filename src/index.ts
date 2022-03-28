@@ -1,6 +1,7 @@
 import glob from 'glob'
 import constants from './constants'
 import {cloneRepo, loadReposFile, setupCache} from './core/cache'
+import {getCurrentBranch} from './core/git'
 import PackageXml from './core/package-xml'
 
 async function main() {
@@ -32,6 +33,15 @@ async function main() {
     packageXml.getPackageName(),
     packageXml.getVersion(),
     packageXml.render(),
+  )
+
+  const repos = glob.sync('**/.git', {
+    cwd: constants.cachedReposDirectory,
+    realpath: true,
+  })
+  console.log(
+    getCurrentBranch(repos[0]),
+    // addTag(repos[0]),
   )
 }
 
