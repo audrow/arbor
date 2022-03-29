@@ -76,7 +76,7 @@
     "js-yaml": "^4.1.0",
     "node-fetch": "^3.2.3",
     "pino": "^7.9.2",
-    "simple-git": "^3.4.0",
+    "simple-git": "^3.5.0",
     "xml-formatter": "^2.6.1"
   }
 }
