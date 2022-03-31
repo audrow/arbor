@@ -13,6 +13,10 @@ export function addTag(path: string, tag: string) {
   return simpleGit(path).addTag(tag)
 }
 
+export function getLastTag(path: string) {
+  return runInDifferentDirectory(path, gitRevSync.tag)
+}
+
 function runInDifferentDirectory(path: string, fn: () => void): unknown {
   const currentDir = process.cwd()
   process.chdir(path)

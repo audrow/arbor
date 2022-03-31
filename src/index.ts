@@ -1,8 +1,9 @@
 import glob from 'glob'
 import constants from './constants'
 import {cloneRepo, loadReposFile, setupCache} from './core/cache'
-import {getCurrentBranch, isTagDirty} from './core/git'
+import {getCurrentBranch, getLastTag, isTagDirty} from './core/git'
 import PackageXml from './core/package-xml'
+import {getMaintainers, getVersion} from './core/ros2-repos'
 
 async function main() {
   await setupCache()
@@ -42,6 +43,9 @@ async function main() {
   console.log(
     getCurrentBranch(repos[0]),
     isTagDirty(repos[0]),
+    getLastTag(repos[0]),
+    getMaintainers(repos[0]),
+    getVersion(repos[0]),
     // addTag(repos[0]),
   )
 }
