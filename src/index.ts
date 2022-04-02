@@ -1,6 +1,9 @@
+import {Command} from 'commander'
 import glob from 'glob'
+import * as commands from './commands/index'
 import constants from './constants'
 import {cloneRepo, loadReposFile, setupCache} from './core/cache'
+import Cli from './core/cli'
 import {getCurrentBranch, getLastTag, isTagDirty} from './core/git'
 import PackageXml from './core/package-xml'
 import {
@@ -9,9 +12,7 @@ import {
   getVersion,
 } from './core/ros2-repos'
 
-async function main() {
-  await setupCache()
-
+async function demo() {
   const reposFile = loadReposFile(constants.cachedReposFilePath)
   Object.entries(reposFile.repositories)
     .slice(0, 2)
@@ -55,4 +56,26 @@ async function main() {
   )
 }
 
-main()
+function setupCli() {
+  const cli = new Cli()
+
+  const demoCommand: Command = new Command('demo')
+    .description('Demo')
+    .action(demo)
+  cli.addCommand(demoCommand)
+
+  cli.addCommand(commands.maintainer)
+  cli.addCommand(commands.repos)
+
+  return cli
+}
+
+async function main() {
+  await setupCache()
+  const cli = setupCli()
+  cli.process()
+}
+
+if (typeof require !== 'undefined' && require.main === module) {
+  main()
+}

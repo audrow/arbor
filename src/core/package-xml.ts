@@ -7,7 +7,7 @@ import format from 'xml-formatter'
 import isEqual from '../utils/is-equal'
 import {difference, union} from '../utils/sets'
 import log from './logger'
-import type People from './__types__/People'
+import type People from './__types__/person'
 
 const MAINTAINER_TAG = 'maintainer'
 const AUTHOR_TAG = 'author'

@@ -1,25 +1,20 @@
 {
-  "name": "node-ts-template",
+  "name": "arbor",
   "version": "0.0.1",
-  "description": "A starting point for NodeJS Typescript projects.",
+  "description": "A tool to make common ROS 2 operations easier",
   "main": "dist/cjs/index.js",
   "types": "dist/types/index.d.ts",
   "module": "dist/esm/index.js",
   "source": "src/index.ts",
   "scripts": {
-    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:types",
-    "build:cjs": "tsc --project ./tsconfig.cjs.json",
-    "build:esm": "tsc --project ./tsconfig.esm.json",
-    "build:types": "tsc --project ./tsconfig.types.json",
-    "clean": "rm -rf dist",
     "prepare": "husky install",
     "lint": "eslint src --ignore-path .gitignore --max-warnings 0",
     "prettier": "prettier --ignore-path .gitignore \"**/*.(js|jsx|json|yml|yaml|css|ts|tsx|md|mdx)\"",
     "format": "npm run prettier -- --write",
     "check-format": "npm run prettier -- --list-different",
     "test": "jest",
-    "validate-sync": "npm-run-all lint check-format test build",
-    "validate": "npm-run-all --parallel lint check-format test build"
+    "validate-sync": "npm-run-all lint check-format test",
+    "validate": "npm-run-all --parallel lint check-format test"
   },
   "files": [
     "dist"
@@ -69,6 +64,7 @@
   "dependencies": {
     "@types/git-rev-sync": "^2.0.0",
     "ajv": "^8.11.0",
+    "commander": "^9.1.0",
     "git-clone": "^0.2.0",
     "git-rev-sync": "^3.0.2",
     "glob": "^7.2.0",

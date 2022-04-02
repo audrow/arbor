@@ -1,4 +1,4 @@
-import RepoInfo from './RepoInfo'
+import RepoInfo from './repo-info'
 
 type ReposFile = {
   repositories: {

@@ -1,5 +1,5 @@
 import type {JSONSchemaType} from 'ajv'
-import type ReposFile from '../__types__/ReposFile'
+import type ReposFile from '../__types__/repos-file'
 
 export const ReposFileSchema: JSONSchemaType<ReposFile> = {
   type: 'object',

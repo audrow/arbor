@@ -6,9 +6,9 @@ import {join} from 'path'
 import constants from '../constants'
 import validateSchema from '../utils/validate-schema'
 import log from './logger'
-import {ReposFileSchema} from './__schemas__/ReposFile'
-import type RepoInfo from './__types__/RepoInfo'
-import type ReposFile from './__types__/ReposFile'
+import {ReposFileSchema} from './__schemas__/repos-file'
+import type RepoInfo from './__types__/repo-info'
+import type ReposFile from './__types__/repos-file'
 
 export async function getReposFile(reposUrl: string, reposFilePath: string) {
   const data = await fetch(reposUrl)
