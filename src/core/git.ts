@@ -7,7 +7,7 @@ export function getCurrentBranch(path: string) {
 }
 
 export function isTagDirty(path: string) {
-  return runInDifferentDirectory(path, gitRevSync.isTagDirty)
+  return runInDifferentDirectory(path, gitRevSync.isTagDirty) as boolean
 }
 
 export function addTag(path: string, tag: string) {
@@ -46,4 +46,28 @@ function runInDifferentDirectory(path: string, fn: () => void): unknown {
   const out = fn()
   process.chdir(currentDir)
   return out
+}
+
+async function main() {
+  const constants = (await import('./constants')).default
+  const getRepoPaths = (await import('./workspace')).getRepoPaths
+  const repoPaths = getRepoPaths(constants.cachedReposDirectory)
+  for (const repoPath of repoPaths) {
+    console.log(repoPath)
+    console.log('branch:', getCurrentBranch(repoPath))
+    console.log('is tag dirty:', isTagDirty(repoPath))
+    console.log('last tag:', getLastTag(repoPath))
+    console.log(
+      'commit messages since last tag:',
+      await getCommitMessagesSinceLastTag(repoPath),
+    )
+    console.log(
+      'contributors since last tag:',
+      await getContributorsSinceLastTag(repoPath),
+    )
+  }
+}
+
+if (typeof require !== 'undefined' && require.main === module) {
+  main()
 }

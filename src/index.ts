@@ -1,9 +1,9 @@
 import {Command} from 'commander'
 import glob from 'glob'
 import * as commands from './commands/index'
-import constants from './constants'
 import {cloneRepo, loadReposFile, setupCache} from './core/cache'
 import Cli from './core/cli'
+import constants from './core/constants'
 import {getCurrentBranch, getLastTag, isTagDirty} from './core/git'
 import PackageXml from './core/package-xml'
 import {
@@ -45,7 +45,7 @@ async function demo() {
     cwd: constants.cachedReposDirectory,
     realpath: true,
   })
-  const idx = 1
+  const idx = 0
   console.log(
     getCurrentBranch(repos[idx]),
     isTagDirty(repos[idx]),

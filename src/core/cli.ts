@@ -11,9 +11,6 @@ export default class Cli {
       .showHelpAfterError('(add --help for additional information)')
       .showSuggestionAfterError(true)
       .allowExcessArguments(false)
-      .configureHelp({
-        sortSubcommands: true,
-      })
   }
   addCommand(command: Command) {
     this.rootCommand.addCommand(command)
@@ -26,11 +23,15 @@ export default class Cli {
   }
 }
 
-if (typeof require !== 'undefined' && require.main === module) {
+function main() {
   const newCommand = new Command('say-hi').alias('hi').action(() => {
     console.log('Hi!')
   })
   const cli = new Cli()
   cli.addCommand(newCommand)
   cli.process()
+}
+
+if (typeof require !== 'undefined' && require.main === module) {
+  main()
 }

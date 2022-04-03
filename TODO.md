@@ -6,7 +6,7 @@
 - [x] Update and set maintainers and authors
 - [ ] Test package.xml functions
 - [ ] Make commits and pull requests from Octocat
-- [ ] Make plugable CLI
+- [x] Make plugable CLI
 - [ ] Point to src directory or repos file
 - [ ] Support refreshing cache
 - [ ] Get repos that need a release

@@ -1,5 +1,5 @@
 import pino from 'pino'
-import {debugLevel} from '../constants'
+import {debugLevel} from '../config'
 
 const logger = pino({
   level: process.env.LOG_LEVEL || debugLevel,
