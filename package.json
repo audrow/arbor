@@ -1,6 +1,6 @@
 {
   "name": "arbor",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A tool to make common ROS 2 operations easier",
   "main": "dist/cjs/index.js",
   "types": "dist/types/index.d.ts",
