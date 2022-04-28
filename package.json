@@ -70,7 +70,7 @@
     "glob": "^8.0.1",
     "htmlparser2": "^8.0.0",
     "js-yaml": "^4.1.0",
-    "node-fetch": "^3.2.3",
+    "node-fetch": "^3.2.4",
     "pino": "^7.11.0",
     "simple-git": "^3.7.1",
     "xml-formatter": "^2.6.1"
